@@ -43,6 +43,7 @@ advanced case:
   fields frame.time,frame.time_epoch,ip.src,ip.dst,ip.proto
   types time,double,string,string,long
   convertdot __
+</source>
 ```
 
 ## Configuration
