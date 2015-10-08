@@ -1,0 +1,15 @@
+<source>
+  type pcapng
+  id pcap_input
+
+  tag mypcap
+  interface wlan2
+  fields radiotap.channel.freq,wlan.fc.type_subtype,wlan.ta
+  types long,long,string
+  convertdot __
+</source>
+
+<match mypcap>
+  type stdout
+  id stdout_output
+</match>
