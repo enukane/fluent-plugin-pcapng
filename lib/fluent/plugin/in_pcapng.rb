@@ -14,6 +14,8 @@
 #    limitations under the License.
 #
 
+require 'fluent/input'
+
 module Fluent
   class PcapngInput < Input
     Plugin.register_input('pcapng', self)
@@ -21,6 +23,7 @@ module Fluent
     require 'open3'
     require 'csv'
     require 'time'
+    require 'shellwords'
 
     LONG="long"
     DOUBLE="double"
@@ -40,6 +43,7 @@ module Fluent
     config_param :types, :default => [] do |val|
       val.split(',')
     end
+    config_param :extra_flags, :array, :default => []
 
     def configure(conf)
       super
@@ -72,13 +76,18 @@ module Fluent
 
     def run
       options = build_options(@fields)
-      cmdline = "tshark -i #{@interface} -T fields -E separator=\",\" -E quote=d #{options}"
-      print cmdline + "\n"
-      stdin, stdout, stderr, @th_tshark = *Open3.popen3(cmdline)
+      options += build_extra_flags(@extra_flags)
+      cmdline = "tshark -i #{Shellwords(@interface)} -T fields -E separator=\",\" -E quote=d #{options}"
+      log.debug format("pcapng: %s", cmdline)
+      _stdin, stdout, stderr, @th_tshark = *Open3.popen3(cmdline)
 
       while @th_tshark.alive?
         collect_tshark_output(stdout)
       end
+      stderr.each do |l|
+        log.error(l.chomp)
+      end
+      raise RuntimeError, "tshark is not running"
     rescue => e
       log.error "unexpected error", :error => e.to_s
       log.error_backtrace e.backtrace
@@ -87,7 +96,25 @@ module Fluent
     def build_options(fields)
       options = ""
       fields.each do |field|
-        options += "-e \"#{field}\" "
+        options += "-e #{Shellwords.escape(field)}"
+      end
+      return options
+    end
+
+    def build_extra_flags(extra_flags)
+      options = ""
+      # valid_flag_re = /-(?:[a-zA-Z]|-[a-z\-]+)/
+      valid_flag_re = /(?:-[a-zA-Z]|--[a-z\-]+)/
+      extra_flags.each do |i|
+        if !i.match(/^#{valid_flag_re}/)
+          raise ArgumentError, format("Invalid flags in extra_flags %s", i)
+        end
+
+        # escape given flags here because it is easier to understand, or write,
+        # extra_flags in fluentd config.
+        (k, v) = i.split(/\s+/, 2)
+        options += "#{Shellwords.escape(k)} "
+        options += "#{Shellwords.escape(v)} " if v
       end
       return options
     end
