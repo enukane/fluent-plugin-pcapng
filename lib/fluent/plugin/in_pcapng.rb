@@ -103,7 +103,6 @@ module Fluent
 
     def build_extra_flags(extra_flags)
       options = ""
-      # valid_flag_re = /-(?:[a-zA-Z]|-[a-z\-]+)/
       valid_flag_re = /(?:-[a-zA-Z]|--[a-z\-]+)/
       extra_flags.each do |i|
         if !i.match(/^#{valid_flag_re}/)
