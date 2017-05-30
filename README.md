@@ -54,4 +54,4 @@ advanced case:
 | fields | array | required | none | list of field to extract (-e on tshark) |
 | types | array | optional | "string" for all | list of type for each field ("long", "double", "string", "time") |
 | convertdot | string | optional | none | convert "." in field name (for outputing int DB who doesn't accept "dot" in schema) |
-
+| extra_flags | array of strings | optional | none | extra flags passed to `tshark(1)`, such as `extra_flags [ "-Y dns.flags.response == 0", "-f port 53" ]`. Each element is expected to be in the form of "--option value" or a single flag, such as `-I`. Note that value of each flag will be safely quoted. |
