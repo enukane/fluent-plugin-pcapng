@@ -96,7 +96,7 @@ module Fluent
     def build_options(fields)
       options = ""
       fields.each do |field|
-        options += "-e #{Shellwords.escape(field)}"
+        options += "-e #{Shellwords.escape(field)} "
       end
       return options
     end
