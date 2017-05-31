@@ -72,4 +72,9 @@ class PcapngInputTest < Test::Unit::TestCase
     instance = create_driver(config).instance
     assert_raise ArgumentError do instance.build_extra_flags(instance.extra_flags) end
   end
+
+  def test_build_options_with_valid_flags
+    instance = create_driver.instance
+    assert_equal "-e frame.time_epoch -e dns.qry.name -e dns.qry.type -e dns.qry.class -e dns.id -e ip.src -e ip.dst ", instance.build_options(instance.fields)
+  end
 end

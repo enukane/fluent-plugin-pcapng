@@ -77,7 +77,7 @@ module Fluent
     def run
       options = build_options(@fields)
       options += build_extra_flags(@extra_flags)
-      cmdline = "tshark -i #{Shellwords(@interface)} -T fields -E separator=\",\" -E quote=d #{options}"
+      cmdline = "tshark -i #{Shellwords.escape(@interface)} -T fields -E separator=\",\" -E quote=d #{options}"
       log.debug format("pcapng: %s", cmdline)
       _stdin, stdout, stderr, @th_tshark = *Open3.popen3(cmdline)
 
@@ -96,7 +96,7 @@ module Fluent
     def build_options(fields)
       options = ""
       fields.each do |field|
-        options += "-e #{Shellwords.escape(field)}"
+        options += "-e #{Shellwords.escape(field)} "
       end
       return options
     end
